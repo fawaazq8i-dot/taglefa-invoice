@@ -317,5 +317,58 @@ function toast(msg, type = '') {
   t._t = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
+/* ===== PDF / مشاركة ===== */
+function loadScript(src) {
+  return new Promise((ok, fail) => {
+    if (document.querySelector(`script[src="${src}"]`)) { ok(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = ok; s.onerror = fail;
+    document.head.appendChild(s);
+  });
+}
+
+async function sharePDF() {
+  toast('جاري تجهيز الـ PDF…');
+  try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  } catch {
+    toast('تعذّر تحميل مكتبة PDF — تحقق من الإنترنت', 'err'); return;
+  }
+
+  const inv = document.getElementById('invoice');
+  const noPrint = inv.querySelectorAll('.no-print');
+  noPrint.forEach(el => el.style.display = 'none');
+
+  try {
+    const canvas = await html2canvas(inv, { scale: 2.5, useCORS: true, backgroundColor: '#fff' });
+    noPrint.forEach(el => el.style.display = '');
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = (canvas.height * pageW) / canvas.width;
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, pageW, pageH);
+
+    const num = document.getElementById('badgeNum').value || '0001';
+    const filename = `فاتورة-${num}.pdf`;
+    const blob = pdf.output('blob');
+    const file = new File([blob], filename, { type: 'application/pdf' });
+
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: `فاتورة تغليفة #${num}` });
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
+    toast('تم تجهيز الـ PDF ✓', 'ok');
+  } catch (e) {
+    noPrint.forEach(el => el.style.display = '');
+    toast('حدث خطأ أثناء إنشاء PDF', 'err');
+  }
+}
+
 /* ===== تشغيل ===== */
 init().catch(err => { console.error(err); toast('خطأ في قاعدة البيانات', 'err'); });

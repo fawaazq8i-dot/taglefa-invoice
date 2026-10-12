@@ -42,6 +42,7 @@ body {
 .btn-addcust{ background: var(--gold); color: #fff; }
 .btn-cust   { background: #9C27B0; color: #fff; }
 .btn-hist   { background: #607D8B; color: #fff; }
+.btn-pdf    { background: #E53935; color: #fff; }
 
 /* ===== خلفية الصفحة ===== */
 .page-bg {
