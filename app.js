@@ -60,8 +60,18 @@ function makeRow(n, d = {}) {
     <td><input type="number" min="0" step="any" value="${d.qty||''}" oninput="calcRow(this)"></td>
     <td><input type="number" min="0" step="any" value="${d.price||''}" oninput="calcRow(this)"></td>
     <td class="row-total">${d.total||''}</td>
+    <td class="no-print" style="padding:0;text-align:center"><button class="del-row-icon" onclick="deleteRow(this)">×</button></td>
   `;
   return tr;
+}
+
+function deleteRow(btn) {
+  const tb = document.getElementById('itemsBody');
+  if (tb.rows.length <= 1) { toast('يجب أن يبقى صف واحد على الأقل', 'err'); return; }
+  btn.closest('tr').remove();
+  Array.from(tb.rows).forEach((r, i) => r.cells[0].textContent = i + 1);
+  updateRowCount();
+  calcGrand();
 }
 
 function addRow() {

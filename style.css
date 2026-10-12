@@ -250,6 +250,7 @@ body {
 .c-qty   { width: 13%; }
 .c-price { width: 18%; }
 .c-total { width: 17%; }
+.c-del   { width: 28px; }
 
 /* رأس الجدول - ذهبي */
 .items-tbl thead tr { background: var(--gold); }
@@ -279,6 +280,15 @@ body {
 .row-total {
   color: var(--gold-dark); font-weight: 700;
 }
+
+.del-row-icon {
+  background: none; border: none; cursor: pointer;
+  color: #c0392b; font-size: 16px; font-weight: 900;
+  width: 28px; height: 100%; padding: 0; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto;
+}
+.del-row-icon:active { opacity: .6; }
 
 /* صف المجموع الكلي */
 .items-tbl tfoot .ft-empty {
