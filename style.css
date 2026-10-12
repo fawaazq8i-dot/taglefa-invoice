@@ -182,7 +182,11 @@ body {
 
 .ic-lbl {
   font-size: 12px; font-weight: 700; color: var(--gold-dark);
-  margin-bottom: 1px; white-space: nowrap;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+.ic-row {
+  display: flex; align-items: center; gap: 6px; width: 100%;
 }
 
 .ic-inp {

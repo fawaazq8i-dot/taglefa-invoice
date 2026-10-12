@@ -81,21 +81,23 @@
       <tr>
         <!-- اسم العميل - الصف الأول فقط -->
         <td class="ic ic-cust" rowspan="1">
-          <div class="ic-lbl">اسم العميل :</div>
-          <div class="ac-wrap">
-            <input type="text" id="customerName" class="ic-inp" autocomplete="off"
-                   oninput="searchCustomers(this.value)">
-            <div id="ac-box" class="ac-box"></div>
+          <div class="ic-row">
+            <div class="ic-lbl">اسم العميل :</div>
+            <div class="ac-wrap" style="flex:1">
+              <input type="text" id="customerName" class="ic-inp" autocomplete="off"
+                     oninput="searchCustomers(this.value)">
+              <div id="ac-box" class="ac-box"></div>
+            </div>
           </div>
         </td>
         <!-- رقم التلفون + التاريخ -->
         <td class="ic ic-phone">
           <div class="pay-date-row">
-            <div>
+            <div class="ic-row">
               <div class="ic-lbl">رقم التلفون :</div>
-              <input type="tel" id="customerPhone" class="ic-inp">
+              <input type="tel" id="customerPhone" class="ic-inp" style="flex:1">
             </div>
-            <div>
+            <div class="ic-row">
               <div class="ic-lbl">التاريخ :</div>
               <div class="date-val" id="invoiceDateDisplay"></div>
             </div>
@@ -105,16 +107,20 @@
       <tr>
         <!-- طريقة الدفع - عرض كامل -->
         <td class="ic ic-pay" colspan="2">
-          <div class="ic-lbl">طريقة الدفع :</div>
-          <input type="text" id="paymentMethod" class="ic-inp">
+          <div class="ic-row">
+            <div class="ic-lbl">طريقة الدفع :</div>
+            <input type="text" id="paymentMethod" class="ic-inp" style="flex:1">
+          </div>
           <div id="invoiceDate" style="display:none"></div>
         </td>
       </tr>
       <tr>
         <!-- عنوان التوصيل - عرض كامل -->
         <td class="ic ic-addr" colspan="2">
-          <div class="ic-lbl">عنوان التوصيل :</div>
-          <input type="text" id="deliveryAddress" class="ic-inp">
+          <div class="ic-row">
+            <div class="ic-lbl">عنوان التوصيل :</div>
+            <input type="text" id="deliveryAddress" class="ic-inp" style="flex:1">
+          </div>
         </td>
       </tr>
     </tbody>
