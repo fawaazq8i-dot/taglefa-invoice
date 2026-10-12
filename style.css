@@ -297,15 +297,27 @@ body {
   background: #fffbf0;
 }
 
-/* زر إضافة صف */
-.add-row-btn {
-  display: block; width: 100%;
-  background: none; border: 1px dashed var(--gold);
-  color: var(--gold-dark); padding: 5px;
-  font-family: 'Cairo', sans-serif; font-size: 12px;
-  font-weight: 700; cursor: pointer; transition: background .15s;
+/* شريط التحكم بالصفوف */
+.row-ctrl-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  border: 1px dashed var(--gold); gap: 0;
 }
-.add-row-btn:hover { background: #fff8e6; }
+
+.row-ctrl-btn {
+  background: none; border: none;
+  color: var(--gold-dark); padding: 5px 14px;
+  font-family: 'Cairo', sans-serif; font-size: 13px;
+  font-weight: 700; cursor: pointer; transition: background .15s;
+  flex: 1; text-align: center;
+}
+.row-ctrl-btn:hover { background: #fff8e6; }
+.row-ctrl-del { color: #c0392b; border-left: 1px dashed var(--gold); }
+.row-ctrl-add { color: #27ae60; border-right: 1px dashed var(--gold); }
+
+.row-ctrl-count {
+  font-size: 12px; color: var(--gray); font-weight: 600;
+  padding: 0 10px; white-space: nowrap;
+}
 
 /* ===== قسم التوقيع ===== */
 .sig-row {

@@ -67,6 +67,18 @@ function makeRow(n, d = {}) {
 function addRow() {
   const tb = document.getElementById('itemsBody');
   tb.appendChild(makeRow(tb.rows.length + 1));
+  updateRowCount();
+}
+
+function removeRow() {
+  const tb = document.getElementById('itemsBody');
+  if (tb.rows.length > 1) tb.deleteRow(tb.rows.length - 1);
+  updateRowCount();
+}
+
+function updateRowCount() {
+  const el = document.getElementById('rowCount');
+  if (el) el.textContent = document.getElementById('itemsBody').rows.length + ' صف';
 }
 
 /* ===== حساب المجاميع ===== */
@@ -93,11 +105,18 @@ function resetInvoice() {
   const d = todayStr();
   document.getElementById('invoiceDate').textContent = d;
   document.getElementById('invoiceDateDisplay').value = d;
+  document.getElementById('invoiceTime').value = nowTimeStr();
+  updateRowCount();
 }
 
 function todayStr() {
   const d = new Date();
   return `${String(d.getDate()).padStart(2,'0')} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()}`;
+}
+
+function nowTimeStr() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
 function syncNum(v) {
@@ -159,7 +178,9 @@ async function newInvoice() {
 /* ===== حفظ الفاتورة ===== */
 async function saveInvoice() {
   const number  = document.getElementById('badgeNum').value.trim();
-  const date    = document.getElementById('invoiceDateDisplay').value || document.getElementById('invoiceDate').textContent;
+  const dateVal = document.getElementById('invoiceDateDisplay').value || document.getElementById('invoiceDate').textContent;
+  const timeVal = document.getElementById('invoiceTime').value;
+  const date    = timeVal ? dateVal + ' ' + timeVal : dateVal;
   const customer= document.getElementById('customerName').value.trim();
   const phone   = document.getElementById('customerPhone').value.trim();
   const address = document.getElementById('deliveryAddress').value.trim();
@@ -265,6 +286,7 @@ async function loadInv(id) {
     tb.appendChild(makeRow(i+1, it || {}));
   }
   calcGrand();
+  updateRowCount();
   closeModal('modalHist');
   toast(`تم تحميل #${inv.number}`, 'ok');
 }

@@ -100,6 +100,7 @@
             <div class="ic-row">
               <div class="ic-lbl">التاريخ :</div>
               <input type="text" class="date-val ic-inp" id="invoiceDateDisplay" style="flex:1">
+              <input type="time" id="invoiceTime" class="ic-inp" style="width:88px;flex-shrink:0;text-align:center;direction:ltr">
             </div>
           </div>
         </td>
@@ -156,8 +157,12 @@
     </tfoot>
   </table>
 
-  <!-- زر إضافة صف (يختفي عند الطباعة) -->
-  <button class="add-row-btn no-print" onclick="addRow()">+ إضافة صف</button>
+  <!-- أزرار التحكم بالصفوف (تختفي عند الطباعة) -->
+  <div class="row-ctrl-bar no-print">
+    <button class="row-ctrl-btn row-ctrl-del" onclick="removeRow()">− حذف صف</button>
+    <span class="row-ctrl-count" id="rowCount">15 صف</span>
+    <button class="row-ctrl-btn row-ctrl-add" onclick="addRow()">+ إضافة صف</button>
+  </div>
 
   <!-- ===== قسم التوقيع ===== -->
   <div class="sig-row">
