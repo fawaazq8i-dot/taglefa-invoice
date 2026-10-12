@@ -111,22 +111,25 @@ function calcGrand() {
 /* ===== ملء بيانات الفاتورة ===== */
 function resetInvoice() {
   const num = String(curNum).padStart(4, '0');
-  document.getElementById('badgeNum').value  = num;
+  document.getElementById('badgeNum').value = num;
   const d = todayStr();
   document.getElementById('invoiceDate').textContent = d;
   document.getElementById('invoiceDateDisplay').value = d;
-  document.getElementById('invoiceTime').value = nowTimeStr();
   updateRowCount();
 }
 
 function todayStr() {
   const d = new Date();
-  return `${String(d.getDate()).padStart(2,'0')} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()}`;
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
 }
 
-function nowTimeStr() {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+function formatDateAr(val) {
+  if (!val) return '';
+  const [y, m, d] = val.split('-');
+  return `${d} / ${m} / ${y}`;
 }
 
 function syncNum(v) {
@@ -189,8 +192,7 @@ async function newInvoice() {
 async function saveInvoice() {
   const number  = document.getElementById('badgeNum').value.trim();
   const dateVal = document.getElementById('invoiceDateDisplay').value || document.getElementById('invoiceDate').textContent;
-  const timeVal = document.getElementById('invoiceTime').value;
-  const date    = timeVal ? dateVal + ' ' + timeVal : dateVal;
+  const date    = formatDateAr(dateVal) || dateVal;
   const customer= document.getElementById('customerName').value.trim();
   const phone   = document.getElementById('customerPhone').value.trim();
   const address = document.getElementById('deliveryAddress').value.trim();
@@ -282,7 +284,9 @@ async function loadInv(id) {
 
   document.getElementById('badgeNum').value             = inv.number;
   document.getElementById('invoiceDate').textContent = inv.date;
-  document.getElementById('invoiceDateDisplay').value = inv.date;
+  // تحويل "DD / MM / YYYY" أو "YYYY-MM-DD" إلى صيغة input type=date
+  const dp = inv.date.includes('-') ? inv.date : (inv.date.split('/').map(s=>s.trim()).reverse().join('-'));
+  document.getElementById('invoiceDateDisplay').value = dp;
   document.getElementById('customerName').value         = inv.customer || '';
   document.getElementById('customerPhone').value        = inv.phone || '';
   document.getElementById('deliveryAddress').value      = inv.address || '';
