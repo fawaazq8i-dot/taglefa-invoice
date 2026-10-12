@@ -120,16 +120,7 @@ function resetInvoice() {
 
 function todayStr() {
   const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
-
-function formatDateAr(val) {
-  if (!val) return '';
-  const [y, m, d] = val.split('-');
-  return `${d} / ${m} / ${y}`;
+  return `${String(d.getDate()).padStart(2,'0')} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()}`;
 }
 
 function syncNum(v) {
@@ -191,8 +182,7 @@ async function newInvoice() {
 /* ===== حفظ الفاتورة ===== */
 async function saveInvoice() {
   const number  = document.getElementById('badgeNum').value.trim();
-  const dateVal = document.getElementById('invoiceDateDisplay').value || document.getElementById('invoiceDate').textContent;
-  const date    = formatDateAr(dateVal) || dateVal;
+  const date    = document.getElementById('invoiceDateDisplay').value || document.getElementById('invoiceDate').textContent;
   const customer= document.getElementById('customerName').value.trim();
   const phone   = document.getElementById('customerPhone').value.trim();
   const address = document.getElementById('deliveryAddress').value.trim();
@@ -284,9 +274,7 @@ async function loadInv(id) {
 
   document.getElementById('badgeNum').value             = inv.number;
   document.getElementById('invoiceDate').textContent = inv.date;
-  // تحويل "DD / MM / YYYY" أو "YYYY-MM-DD" إلى صيغة input type=date
-  const dp = inv.date.includes('-') ? inv.date : (inv.date.split('/').map(s=>s.trim()).reverse().join('-'));
-  document.getElementById('invoiceDateDisplay').value = dp;
+  document.getElementById('invoiceDateDisplay').value = inv.date;
   document.getElementById('customerName').value         = inv.customer || '';
   document.getElementById('customerPhone').value        = inv.phone || '';
   document.getElementById('deliveryAddress').value      = inv.address || '';
