@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>تغليفة - فاتورة</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#C9A227">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== شريط الأدوات (يختفي عند الطباعة) ===== -->
+<div class="toolbar no-print">
+  <button class="btn btn-new" onclick="newInvoice()">📋 جديدة</button>
+  <button class="btn btn-save" onclick="saveInvoice()">💾 حفظ</button>
+  <button class="btn btn-print" onclick="window.print()">🖨️ طباعة</button>
+  <button class="btn btn-addcust" onclick="saveCurrentCustomer()">➕ حفظ عميل</button>
+  <button class="btn btn-cust" onclick="showCustomersModal()">👥 العملاء</button>
+  <button class="btn btn-hist" onclick="showHistoryModal()">📂 السجل</button>
+</div>
+
+<!-- ===== الفاتورة ===== -->
+<div class="page-bg">
+<div class="invoice" id="invoice">
+
+  <!-- رقم الفاتورة الأحمر (إضافة فوق اليمين) -->
+  <div class="red-badge">
+    <div class="red-badge-lbl">رقم الفاتورة</div>
+    <input type="text" id="badgeNum" class="red-badge-num" value="0001" oninput="syncNum(this.value)">
+  </div>
+
+  <!-- ===== رأس الفاتورة ===== -->
+  <div class="inv-head">
+
+    <!-- الشعار والاسم (يسار) - عمودي مثل الأصل -->
+    <div class="head-brand">
+      <div class="logo-box">
+        <img src="logo.png" class="logo-img" alt=""
+             onload="document.getElementById('brandWords').style.display='none'"
+             onerror="this.style.display='none';document.getElementById('logoFb').style.display='flex'">
+        <div id="logoFb" class="logo-fb" style="display:none">
+          <!-- SVG يحاكي شعار TG الأصلي -->
+          <svg viewBox="0 0 110 120" xmlns="http://www.w3.org/2000/svg" width="90" height="100">
+            <!-- دائرة خارجية -->
+            <ellipse cx="55" cy="55" rx="50" ry="50" fill="none" stroke="#C9A227" stroke-width="1.5"/>
+            <!-- حرف T كبير بسيرف -->
+            <line x1="30" y1="30" x2="80" y2="30" stroke="#C9A227" stroke-width="5" stroke-linecap="round"/>
+            <line x1="30" y1="26" x2="30" y2="34" stroke="#C9A227" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="80" y1="26" x2="80" y2="34" stroke="#C9A227" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="55" y1="30" x2="55" y2="68" stroke="#C9A227" stroke-width="5" stroke-linecap="round"/>
+            <line x1="50" y1="68" x2="60" y2="68" stroke="#C9A227" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- حرف G -->
+            <path d="M80 48 A22 22 0 1 0 80 68" stroke="#C9A227" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <line x1="80" y1="58" x2="68" y2="58" stroke="#C9A227" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="brand-words" id="brandWords">
+        <div class="brand-ar"><span class="brand-dash">—</span> تـغـلـيـفـة <span class="brand-dash">—</span></div>
+        <div class="brand-en">T A G L E F A</div>
+      </div>
+    </div>
+
+    <!-- شارة نوع الفاتورة (يمين) -->
+    <div class="inv-type">
+      <div class="inv-type-ar">فاتورة نقداً / بالحساب</div>
+      <div class="inv-type-en">CASH/CREDIT INVOICE</div>
+    </div>
+
+  </div><!-- end inv-head -->
+
+  <!-- ===== جدول معلومات العميل ===== -->
+  <table class="info-tbl">
+    <colgroup>
+      <col style="width:27%">
+      <col style="width:73%">
+    </colgroup>
+    <tbody>
+      <tr>
+        <!-- اسم العميل - الصف الأول فقط -->
+        <td class="ic ic-cust" rowspan="1">
+          <div class="ic-lbl">اسم العميل :</div>
+          <div class="ac-wrap">
+            <input type="text" id="customerName" class="ic-inp" autocomplete="off"
+                   oninput="searchCustomers(this.value)">
+            <div id="ac-box" class="ac-box"></div>
+          </div>
+        </td>
+        <!-- رقم التلفون + التاريخ -->
+        <td class="ic ic-phone">
+          <div class="pay-date-row">
+            <div>
+              <div class="ic-lbl">رقم التلفون :</div>
+              <input type="tel" id="customerPhone" class="ic-inp">
+            </div>
+            <div>
+              <div class="ic-lbl">التاريخ :</div>
+              <div class="date-val" id="invoiceDateDisplay"></div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <!-- طريقة الدفع - عرض كامل -->
+        <td class="ic ic-pay" colspan="2">
+          <div class="ic-lbl">طريقة الدفع :</div>
+          <input type="text" id="paymentMethod" class="ic-inp">
+          <div id="invoiceDate" style="display:none"></div>
+        </td>
+      </tr>
+      <tr>
+        <!-- عنوان التوصيل - عرض كامل -->
+        <td class="ic ic-addr" colspan="2">
+          <div class="ic-lbl">عنوان التوصيل :</div>
+          <input type="text" id="deliveryAddress" class="ic-inp">
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== جدول البضاعة ===== -->
+  <table class="items-tbl">
+    <colgroup>
+      <col class="c-num">
+      <col class="c-desc">
+      <col class="c-qty">
+      <col class="c-price">
+      <col class="c-total">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>رقم</th>
+        <th>الـوصـف</th>
+        <th>الكمية</th>
+        <th>سعر الوحدة</th>
+        <th>المجموع</th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody">
+      <!-- تُنشئها JavaScript -->
+    </tbody>
+    <tfoot>
+      <tr>
+        <td class="ft-empty" colspan="3"></td>
+        <td class="ft-lbl">المجموع</td>
+        <td class="ft-val" id="grandTotal"></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- زر إضافة صف (يختفي عند الطباعة) -->
+  <button class="add-row-btn no-print" onclick="addRow()">+ إضافة صف</button>
+
+  <!-- ===== قسم التوقيع ===== -->
+  <div class="sig-row">
+    <div class="sig-grp">
+      <span class="sig-lbl">اسم المستلم:</span>
+      <div class="sig-line"></div>
+    </div>
+    <div class="sig-grp">
+      <span class="sig-lbl">توقيع المستلم:</span>
+      <div class="sig-line"></div>
+    </div>
+  </div>
+
+  <!-- ===== تذييل التواصل ===== -->
+  <div class="contact-bar">
+    <span class="cb-item">
+      <svg class="cb-ico" viewBox="0 0 24 24">
+        <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.22 1.1.37 2.3.57 3.6.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.18 21 3 13.82 3 5c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.3.2 2.5.57 3.6.1.32.02.72-.22 1L6.6 10.8z" fill="#C9A227"/>
+      </svg>
+      +965 41045465
+    </span>
+    <span class="cb-item">
+      <svg class="cb-ico" viewBox="0 0 24 24">
+        <rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="#C9A227" stroke-width="2"/>
+        <circle cx="12" cy="12" r="4.5" fill="none" stroke="#C9A227" stroke-width="2"/>
+        <circle cx="17.5" cy="6.5" r="1.5" fill="#C9A227"/>
+      </svg>
+      @taglefa
+    </span>
+    <span class="cb-item">
+      <svg class="cb-ico" viewBox="0 0 24 24">
+        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.66a8.27 8.27 0 004.84 1.55V6.78a4.85 4.85 0 01-1.07-.09z" fill="#C9A227"/>
+      </svg>
+      @taglefakw
+    </span>
+  </div>
+
+</div><!-- end invoice -->
+</div><!-- end page-bg -->
+
+<!-- ===== نافذة العملاء ===== -->
+<div id="modalCust" class="modal no-print" style="display:none">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <span>👥 العملاء</span>
+      <button class="modal-x" onclick="closeModal('modalCust')">✕</button>
+    </div>
+    <div class="modal-bd">
+      <input type="text" id="custSearch" class="modal-search" placeholder="بحث باسم أو رقم..."
+             oninput="filterCusts(this.value)">
+      <div id="custList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== نافذة السجل ===== -->
+<div id="modalHist" class="modal no-print" style="display:none">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <span>📂 سجل الفواتير</span>
+      <button class="modal-x" onclick="closeModal('modalHist')">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div id="histList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- إشعار -->
+<div id="toast" class="toast no-print"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
