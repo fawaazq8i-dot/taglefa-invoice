@@ -92,7 +92,7 @@ function resetInvoice() {
   document.getElementById('badgeNum').value  = num;
   const d = todayStr();
   document.getElementById('invoiceDate').textContent = d;
-  document.getElementById('invoiceDateDisplay').textContent = d;
+  document.getElementById('invoiceDateDisplay').value = d;
 }
 
 function todayStr() {
@@ -159,7 +159,7 @@ async function newInvoice() {
 /* ===== حفظ الفاتورة ===== */
 async function saveInvoice() {
   const number  = document.getElementById('badgeNum').value.trim();
-  const date    = document.getElementById('invoiceDate').textContent;
+  const date    = document.getElementById('invoiceDateDisplay').value || document.getElementById('invoiceDate').textContent;
   const customer= document.getElementById('customerName').value.trim();
   const phone   = document.getElementById('customerPhone').value.trim();
   const address = document.getElementById('deliveryAddress').value.trim();
@@ -250,8 +250,8 @@ async function loadInv(id) {
   if (!confirm('تحميل هذه الفاتورة؟ سيتم مسح الحقول الحالية.')) return;
 
   document.getElementById('badgeNum').value             = inv.number;
-  document.getElementById('invoiceDate').textContent    = inv.date;
-  document.getElementById('invoiceDateDisplay').textContent = inv.date;
+  document.getElementById('invoiceDate').textContent = inv.date;
+  document.getElementById('invoiceDateDisplay').value = inv.date;
   document.getElementById('customerName').value         = inv.customer || '';
   document.getElementById('customerPhone').value        = inv.phone || '';
   document.getElementById('deliveryAddress').value      = inv.address || '';
