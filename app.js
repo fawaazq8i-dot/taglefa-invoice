@@ -333,22 +333,57 @@ async function sharePDF() {
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
   } catch {
-    toast('تعذّر تحميل مكتبة PDF — تحقق من الإنترنت', 'err'); return;
+    toast('تعذّر تحميل مكتبة PDF — تحقق من الاتصال بالإنترنت', 'err'); return;
   }
 
   const inv = document.getElementById('invoice');
   const noPrint = inv.querySelectorAll('.no-print');
   noPrint.forEach(el => el.style.display = 'none');
 
+  // نزول لأعلى الصفحة لضمان التقاط الفاتورة كاملة
+  const prevScroll = window.scrollY;
+  window.scrollTo(0, 0);
+
   try {
-    const canvas = await html2canvas(inv, { scale: 2.5, useCORS: true, backgroundColor: '#fff' });
+    const canvas = await html2canvas(inv, {
+      scale: 2.5,
+      useCORS: true,
+      backgroundColor: '#fff',
+      width:  inv.scrollWidth,
+      height: inv.scrollHeight,
+      windowWidth:  document.documentElement.scrollWidth,
+      windowHeight: inv.scrollHeight + 200,
+      y: inv.getBoundingClientRect().top + window.scrollY,
+      scrollY: -window.scrollY
+    });
+
     noPrint.forEach(el => el.style.display = '');
+    window.scrollTo(0, prevScroll);
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = (canvas.height * pageW) / canvas.width;
-    pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, pageW, pageH);
+
+    // إذا كانت الفاتورة أطول من صفحة A4 — تقسيمها تلقائياً
+    const a4H = pdf.internal.pageSize.getHeight();
+    if (pageH <= a4H) {
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, pageW, pageH);
+    } else {
+      let y = 0;
+      const sliceH = Math.floor((canvas.width * a4H) / pageW);
+      while (y < canvas.height) {
+        const h = Math.min(sliceH, canvas.height - y);
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width  = canvas.width;
+        sliceCanvas.height = h;
+        sliceCanvas.getContext('2d').drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+        const sliceH_mm = (h * pageW) / canvas.width;
+        if (y > 0) pdf.addPage();
+        pdf.addImage(sliceCanvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, pageW, sliceH_mm);
+        y += h;
+      }
+    }
 
     const num = document.getElementById('badgeNum').value || '0001';
     const filename = `فاتورة-${num}.pdf`;
@@ -366,7 +401,8 @@ async function sharePDF() {
     toast('تم تجهيز الـ PDF ✓', 'ok');
   } catch (e) {
     noPrint.forEach(el => el.style.display = '');
-    toast('حدث خطأ أثناء إنشاء PDF', 'err');
+    window.scrollTo(0, prevScroll);
+    toast('حدث خطأ أثناء إنشاء الـ PDF', 'err');
   }
 }
 
