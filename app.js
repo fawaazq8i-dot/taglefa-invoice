@@ -433,104 +433,62 @@ async function sharePDF() {
   }
 }
 
-/* ===== طباعة نظيفة (بدون inputs — تعمل على iOS) ===== */
-function printInvoice() {
-  const num      = document.getElementById('badgeNum').value || '0001';
-  const date     = document.getElementById('invoiceDateDisplay').value || '';
-  const custName = document.getElementById('customerName').value || '';
-  const phone    = document.getElementById('customerPhone').value || '';
-  const payment  = document.getElementById('paymentMethod').value || '';
-  const address  = document.getElementById('deliveryAddress').value || '';
-  const grand    = document.getElementById('grandTotal').textContent || '';
+/* ===== طباعة عبر صورة — مضمونة على iOS ===== */
+async function printInvoice() {
+  toast('جاري تجهيز الطباعة…');
+  try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+  } catch { toast('تعذّر تحميل المكتبة — تحقق من الاتصال', 'err'); return; }
 
-  const rowsHtml = Array.from(document.querySelectorAll('#itemsBody tr')).map((tr, i) => {
-    const desc  = tr.cells[1].querySelector('input').value || '';
-    const qty   = tr.cells[2].querySelector('input').value || '';
-    const price = tr.cells[3].querySelector('input').value || '';
-    const total = tr.cells[4].textContent || '';
-    return `<tr><td>${i+1}</td><td style="text-align:right;padding-right:4px">${desc}</td><td>${qty}</td><td>${price}</td><td>${total}</td></tr>`;
-  }).join('');
+  const inv = document.getElementById('invoice');
+  const noPrint = inv.querySelectorAll('.no-print');
+  noPrint.forEach(el => el.style.display = 'none');
+  if (document.activeElement) document.activeElement.blur();
 
-  const html = `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=750">
-<title>فاتورة ${num}</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-body{font-family:'Cairo',sans-serif;direction:rtl;background:#fff}
-.inv{border:3.5px solid #E8189A;padding:14px;position:relative;width:100%}
-.badge{position:absolute;top:0;right:0;background:#CC0000;padding:5px 14px 7px;border-radius:0 0 0 10px;text-align:center;min-width:115px}
-.badge-lbl{color:rgba(255,255,255,.85);font-size:9px;font-weight:700;display:block;white-space:nowrap}
-.badge-num{color:#fff;font-size:26px;font-weight:900;display:block}
-.head{display:flex;direction:ltr;justify-content:space-between;align-items:flex-end;padding-bottom:10px;padding-right:125px}
-.logo{width:160px;height:auto}
-.type{background:#C9A227;color:#fff;border-radius:7px;padding:8px 18px;text-align:center}
-.type-ar{font-size:14px;font-weight:700}
-.type-en{font-size:11px;opacity:.92}
-.info{width:100%;border-collapse:collapse;border:1.5px solid #1a1a1a}
-.info td{border:1px solid #1a1a1a;padding:5px 10px;vertical-align:top}
-.lbl{font-size:11px;font-weight:700;color:#8B6914;display:block;margin-bottom:3px}
-.val{font-size:13px;color:#1a1a1a;min-height:18px;display:block}
-.ph-row{display:flex;gap:20px}
-.ph-row>div{flex:1}
-.items{width:100%;border-collapse:collapse;font-size:13px;margin-top:0}
-.items thead tr{background:#C9A227}
-.items th{color:#fff;font-weight:700;padding:5px 4px;text-align:center;border:1px solid #a07820}
-.items td{border:1px solid #ccc;padding:2px 4px;text-align:center;height:20px}
-.ft-lbl{font-weight:900;color:#8B6914;text-align:center;border:1.5px solid #C9A227;background:#fff8e6}
-.ft-val{font-weight:900;text-align:center;border:1.5px solid #C9A227;background:#fffbf0}
-.sig{display:flex;justify-content:space-between;gap:20px;padding:10px;border-top:1px solid #ddd;margin-top:4px}
-.sig-g{display:flex;align-items:flex-end;gap:8px;flex:1}
-.sig-l{font-size:12px;font-weight:700;color:#8B6914;white-space:nowrap}
-.sig-line{flex:1;border-bottom:1px dashed #999;height:22px}
-.contact{display:flex;justify-content:center;gap:24px;padding-top:6px;border-top:1.5px solid #bbb;margin-top:4px;flex-wrap:wrap;page-break-inside:avoid}
-.cb{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#444;direction:ltr}
-@page{size:A4 portrait;margin:8mm 7mm}
-</style>
-</head>
-<body>
-<div class="inv">
-  <div class="badge">
-    <span class="badge-lbl">رقم الفاتورة</span>
-    <span class="badge-num">${num}</span>
-  </div>
-  <div class="head">
-    <div><img src="https://fawaazq8i-dot.github.io/taglefa-invoice/logo.png" class="logo" alt="TAGLEFA"></div>
-    <div class="type"><div class="type-ar">فاتورة نقداً / بالحساب</div><div class="type-en">CASH/CREDIT INVOICE</div></div>
-  </div>
-  <table class="info">
-    <tr>
-      <td style="width:40%"><span class="lbl">اسم العميل :</span><span class="val">${custName}</span></td>
-      <td><div class="ph-row"><div><span class="lbl">رقم التلفون :</span><span class="val">${phone}</span></div><div><span class="lbl">التاريخ :</span><span class="val">${date}</span></div></div></td>
-    </tr>
-    <tr><td colspan="2"><span class="lbl">طريقة الدفع :</span><span class="val">${payment}</span></td></tr>
-    <tr><td colspan="2"><span class="lbl">عنوان التوصيل :</span><span class="val">${address}</span></td></tr>
-  </table>
-  <table class="items">
-    <thead><tr><th>رقم</th><th>الـوصـف</th><th>الكمية</th><th>سعر الوحدة</th><th>المجموع</th></tr></thead>
-    <tbody>${rowsHtml}</tbody>
-    <tfoot><tr><td colspan="3" style="border:1px solid #ccc"></td><td class="ft-lbl">المجموع</td><td class="ft-val">${grand}</td></tr></tfoot>
-  </table>
-  <div class="sig">
-    <div class="sig-g"><span class="sig-l">اسم المستلم:</span><div class="sig-line"></div></div>
-    <div class="sig-g"><span class="sig-l">توقيع المستلم:</span><div class="sig-line"></div></div>
-  </div>
-  <div class="contact">
-    <span class="cb">🎵 @taglefakw</span>
-    <span class="cb">📷 @taglefa</span>
-    <span class="cb">📞 +965 41045465</span>
-  </div>
-</div>
-<script>window.onload=function(){window.print();window.onafterprint=function(){window.close()};}<\/script>
-</body>
-</html>`;
+  const prevWidth = inv.style.width, prevMax = inv.style.maxWidth;
+  inv.style.width = '750px'; inv.style.maxWidth = '750px';
+  const prevScroll = window.scrollY;
+  window.scrollTo(0, 0);
+  await document.fonts.ready;
+  await new Promise(r => setTimeout(r, 200));
 
-  const w = window.open('', '_blank');
-  w.document.write(html);
-  w.document.close();
+  try {
+    const canvas = await html2canvas(inv, {
+      scale: 2, useCORS: true, allowTaint: true,
+      backgroundColor: '#ffffff',
+      width: 750, height: inv.scrollHeight,
+      windowWidth: 750, windowHeight: inv.scrollHeight,
+      onclone: (_, clone) => {
+        clone.querySelectorAll('input,textarea').forEach(el => {
+          el.style.outline = 'none'; el.style.boxShadow = 'none'; el.style.background = 'transparent';
+        });
+        const b = clone.querySelector('.red-badge');
+        if (b) { b.style.display='flex'; b.style.zIndex='9999'; b.style.overflow='visible'; }
+      }
+    });
+
+    inv.style.width = prevWidth; inv.style.maxWidth = prevMax;
+    noPrint.forEach(el => el.style.display = '');
+    window.scrollTo(0, prevScroll);
+
+    const img = canvas.toDataURL('image/jpeg', 0.95);
+    const w = window.open('', '_blank');
+    if (!w) { toast('يرجى السماح بالنوافذ المنبثقة في Safari', 'err'); return; }
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff}
+img{width:100%;height:auto;display:block}
+@page{size:auto;margin:5mm}
+@media print{body{margin:0}img{width:100%;page-break-inside:avoid}}
+</style></head><body><img src="${img}">
+<script>window.onload=function(){window.print();window.onafterprint=function(){window.close()}}<\/script>
+</body></html>`);
+    w.document.close();
+  } catch(e) {
+    inv.style.width = prevWidth; inv.style.maxWidth = prevMax;
+    noPrint.forEach(el => el.style.display = '');
+    window.scrollTo(0, prevScroll);
+    toast('حدث خطأ في الطباعة', 'err'); console.error(e);
+  }
 }
 
 /* ===== تشغيل ===== */
