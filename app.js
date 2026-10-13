@@ -361,29 +361,10 @@ async function sharePDF() {
     window.scrollTo(0, prevScroll);
 
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = (canvas.height * pageW) / canvas.width;
-
-    // إذا كانت الفاتورة أطول من صفحة A4 — تقسيمها تلقائياً
-    const a4H = pdf.internal.pageSize.getHeight();
-    if (pageH <= a4H) {
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, pageW, pageH);
-    } else {
-      let y = 0;
-      const sliceH = Math.floor((canvas.width * a4H) / pageW);
-      while (y < canvas.height) {
-        const h = Math.min(sliceH, canvas.height - y);
-        const sliceCanvas = document.createElement('canvas');
-        sliceCanvas.width  = canvas.width;
-        sliceCanvas.height = h;
-        sliceCanvas.getContext('2d').drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
-        const sliceH_mm = (h * pageW) / canvas.width;
-        if (y > 0) pdf.addPage();
-        pdf.addImage(sliceCanvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, pageW, sliceH_mm);
-        y += h;
-      }
-    }
+    const mmW = 210;
+    const mmH = (canvas.height * mmW) / canvas.width;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [mmW, mmH] });
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, mmW, mmH);
 
     const num = document.getElementById('badgeNum').value || '0001';
     const filename = `فاتورة-${num}.pdf`;
