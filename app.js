@@ -351,7 +351,10 @@ async function sharePDF() {
 
   const prevScroll = window.scrollY;
   window.scrollTo(0, 0);
-  await new Promise(r => setTimeout(r, 120));
+
+  // انتظار تحميل الخطوط العربية قبل الالتقاط
+  await document.fonts.ready;
+  await new Promise(r => setTimeout(r, 200));
 
   try {
     const canvas = await html2canvas(inv, {
