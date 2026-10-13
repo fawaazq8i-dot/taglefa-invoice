@@ -433,5 +433,40 @@ async function sharePDF() {
   }
 }
 
+/* ===== إصلاح الطباعة على iOS (input values لا تظهر) ===== */
+function injectPrintVals() {
+  // حقول العميل
+  document.querySelectorAll('.ic-inp, #invoiceDateDisplay').forEach(inp => {
+    if (inp.nextElementSibling?.classList.contains('print-val')) return;
+    const s = document.createElement('span');
+    s.className = 'print-val';
+    s.textContent = inp.value || '';
+    inp.insertAdjacentElement('afterend', s);
+  });
+  // رقم الفاتورة
+  const badgeNum = document.getElementById('badgeNum');
+  if (badgeNum && !badgeNum.nextElementSibling?.classList.contains('print-badge-num')) {
+    const s = document.createElement('span');
+    s.className = 'print-badge-num';
+    s.textContent = badgeNum.value || '0001';
+    badgeNum.insertAdjacentElement('afterend', s);
+  }
+  // صفوف البضاعة
+  document.querySelectorAll('#itemsBody input').forEach(inp => {
+    if (inp.nextElementSibling?.classList.contains('print-val')) return;
+    const s = document.createElement('span');
+    s.className = 'print-val';
+    s.textContent = inp.value || '';
+    inp.insertAdjacentElement('afterend', s);
+  });
+}
+
+function removePrintVals() {
+  document.querySelectorAll('.print-val, .print-badge-num').forEach(el => el.remove());
+}
+
+window.addEventListener('beforeprint', injectPrintVals);
+window.addEventListener('afterprint',  removePrintVals);
+
 /* ===== تشغيل ===== */
 init().catch(err => { console.error(err); toast('خطأ في قاعدة البيانات', 'err'); });
