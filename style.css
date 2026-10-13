@@ -470,6 +470,21 @@ body {
   .sig-row { flex-direction: column; gap: 10px; }
 }
 
+/* ===== overlay الطباعة ===== */
+#print-overlay { display: none; }
+
+@media print {
+  body > *:not(#print-overlay) { display: none !important; }
+  #print-overlay {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    background: #fff !important;
+    z-index: 99999 !important;
+  }
+  #print-overlay img { width: 100% !important; height: auto !important; }
+}
+
 /* ===== طباعة ===== */
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }

@@ -472,17 +472,20 @@ async function printInvoice() {
     window.scrollTo(0, prevScroll);
 
     const img = canvas.toDataURL('image/jpeg', 0.95);
-    const w = window.open('', '_blank');
-    if (!w) { toast('يرجى السماح بالنوافذ المنبثقة في Safari', 'err'); return; }
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff}
-img{width:100%;height:auto;display:block}
-@page{size:auto;margin:5mm}
-@media print{body{margin:0}img{width:100%;page-break-inside:avoid}}
-</style></head><body><img src="${img}">
-<script>window.onload=function(){window.print();window.onafterprint=function(){window.close()}}<\/script>
-</body></html>`);
-    w.document.close();
+
+    // طباعة من نفس الصفحة — بدون popup
+    let overlay = document.getElementById('print-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'print-overlay';
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = `<img src="${img}" style="width:100%;height:auto;display:block">`;
+    overlay.style.display = 'block';
+
+    window.print();
+
+    setTimeout(() => { overlay.style.display = 'none'; overlay.innerHTML = ''; }, 1500);
   } catch(e) {
     inv.style.width = prevWidth; inv.style.maxWidth = prevMax;
     noPrint.forEach(el => el.style.display = '');
