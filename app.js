@@ -340,23 +340,51 @@ async function sharePDF() {
   const noPrint = inv.querySelectorAll('.no-print');
   noPrint.forEach(el => el.style.display = 'none');
 
-  // نزول لأعلى الصفحة لضمان التقاط الفاتورة كاملة
+  // إزالة التحديد البنفسجي من الحقول
+  if (document.activeElement) document.activeElement.blur();
+
+  // تثبيت عرض الفاتورة بحجم desktop لتجنب الهوامش البيضاء
+  const prevWidth    = inv.style.width;
+  const prevMaxWidth = inv.style.maxWidth;
+  inv.style.width    = '750px';
+  inv.style.maxWidth = '750px';
+
   const prevScroll = window.scrollY;
   window.scrollTo(0, 0);
+  await new Promise(r => setTimeout(r, 120));
 
   try {
     const canvas = await html2canvas(inv, {
       scale: 2.5,
       useCORS: true,
-      backgroundColor: '#fff',
-      width:  inv.scrollWidth,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      width: 750,
       height: inv.scrollHeight,
-      windowWidth:  document.documentElement.scrollWidth,
-      windowHeight: inv.scrollHeight + 200,
-      y: inv.getBoundingClientRect().top + window.scrollY,
-      scrollY: -window.scrollY
+      windowWidth: 750,
+      windowHeight: inv.scrollHeight,
+      onclone: (_, clone) => {
+        // إزالة أنماط التحديد من الحقول في النسخة الملتقطة
+        clone.querySelectorAll('input, textarea').forEach(inp => {
+          inp.style.outline    = 'none';
+          inp.style.boxShadow  = 'none';
+          inp.style.background = 'transparent';
+        });
+        // التأكد من ظهور رقم الفاتورة الأحمر
+        const badge = clone.querySelector('.red-badge');
+        if (badge) {
+          badge.style.display  = 'flex';
+          badge.style.zIndex   = '9999';
+          badge.style.position = 'absolute';
+          badge.style.top      = '0';
+          badge.style.right    = '0';
+        }
+      }
     });
 
+    // استعادة العرض الأصلي
+    inv.style.width    = prevWidth;
+    inv.style.maxWidth = prevMaxWidth;
     noPrint.forEach(el => el.style.display = '');
     window.scrollTo(0, prevScroll);
 
@@ -381,9 +409,12 @@ async function sharePDF() {
     }
     toast('تم تجهيز الـ PDF ✓', 'ok');
   } catch (e) {
+    inv.style.width    = prevWidth;
+    inv.style.maxWidth = prevMaxWidth;
     noPrint.forEach(el => el.style.display = '');
     window.scrollTo(0, prevScroll);
     toast('حدث خطأ أثناء إنشاء الـ PDF', 'err');
+    console.error(e);
   }
 }
 
