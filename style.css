@@ -471,7 +471,9 @@ body {
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-  body { background: var(--white) !important; }
+  body { background: var(--white) !important; direction: rtl !important; unicode-bidi: embed !important; }
+
+  html { direction: rtl !important; }
 
   .no-print { display: none !important; }
 
@@ -484,6 +486,7 @@ body {
     padding: 12px 12px 10px;
     margin: 0;
     page-break-inside: avoid;
+    direction: rtl !important;
   }
 
   .red-badge {
