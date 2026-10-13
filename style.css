@@ -471,9 +471,7 @@ body {
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-  body { background: var(--white) !important; direction: rtl !important; unicode-bidi: embed !important; }
-
-  html { direction: rtl !important; }
+  body { background: var(--white) !important; }
 
   .no-print { display: none !important; }
 
@@ -486,13 +484,22 @@ body {
     padding: 12px 12px 10px;
     margin: 0;
     page-break-inside: avoid;
-    direction: rtl !important;
+    position: relative !important;
   }
+
+  /* الحفاظ على اتجاه رأس الفاتورة (لوغو يسار، شارة يمين) */
+  .inv-head { direction: ltr !important; }
 
   .red-badge {
     background: var(--red) !important;
     box-shadow: none;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    display: flex !important;
   }
+
+  .red-badge-lbl { white-space: nowrap !important; }
 
   .items-tbl thead tr { background: var(--gold) !important; }
   .items-tbl th { color: var(--white) !important; }
@@ -504,7 +511,7 @@ body {
 
   .add-row-btn, .save-cust-btn { display: none !important; }
 
-  .ic-inp, .red-badge-num { box-shadow: none !important; }
+  .ic-inp, .red-badge-num { box-shadow: none !important; outline: none !important; }
 
   @page { size: A4 portrait; margin: 8mm 7mm; }
 }
