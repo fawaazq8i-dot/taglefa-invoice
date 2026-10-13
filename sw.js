@@ -1,4 +1,4 @@
-const CACHE = 'taglefa-invoice-v21';
+const CACHE = 'taglefa-invoice-v22';
 const FILES = [
   './',
   './index.html',
