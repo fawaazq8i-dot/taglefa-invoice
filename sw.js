@@ -1,10 +1,11 @@
-const CACHE = 'taglefa-invoice-v28';
+const CACHE = 'taglefa-invoice-v29';
 const FILES = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.json',
+  './logo.png',
   'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap'
 ];
 
