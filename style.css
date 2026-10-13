@@ -77,6 +77,9 @@ body {
   font-size: 9px; font-weight: 700;
   letter-spacing: .5px; line-height: 1;
   margin-bottom: 1px;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: center;
 }
 
 .red-badge-num {
@@ -495,9 +498,9 @@ body {
     box-shadow: none;
     position: absolute !important;
     top: 0 !important;
-    right: 0 !important;
+    right: 3mm !important;
     display: flex !important;
-    min-width: 110px !important;
+    min-width: 120px !important;
     overflow: visible !important;
   }
 
@@ -506,6 +509,7 @@ body {
     direction: rtl !important;
     text-align: center !important;
     width: 100% !important;
+    font-size: 8px !important;
   }
 
   .items-tbl thead tr { background: var(--gold) !important; }

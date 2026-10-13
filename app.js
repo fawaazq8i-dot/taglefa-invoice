@@ -376,11 +376,23 @@ async function sharePDF() {
         // التأكد من ظهور رقم الفاتورة الأحمر
         const badge = clone.querySelector('.red-badge');
         if (badge) {
-          badge.style.display  = 'flex';
-          badge.style.zIndex   = '9999';
-          badge.style.position = 'absolute';
-          badge.style.top      = '0';
-          badge.style.right    = '0';
+          badge.style.display   = 'flex';
+          badge.style.zIndex    = '9999';
+          badge.style.position  = 'absolute';
+          badge.style.top       = '0';
+          badge.style.right     = '0';
+          badge.style.minWidth  = '120px';
+          badge.style.overflow  = 'visible';
+          badge.style.padding   = '5px 16px 6px';
+        }
+        const lbl = clone.querySelector('.red-badge-lbl');
+        if (lbl) {
+          lbl.style.whiteSpace  = 'nowrap';
+          lbl.style.direction   = 'rtl';
+          lbl.style.textAlign   = 'center';
+          lbl.style.width       = '100%';
+          lbl.style.fontSize    = '8px';
+          lbl.style.letterSpacing = '0';
         }
       }
     });
