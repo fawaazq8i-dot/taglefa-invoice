@@ -486,8 +486,13 @@ body {
     max-width: 100%; width: 100%;
     padding: 12px 12px 10px;
     margin: 0;
-    page-break-inside: avoid;
     position: relative !important;
+    overflow: visible !important;
+  }
+
+  .contact-bar {
+    display: flex !important;
+    -webkit-print-color-adjust: exact !important;
   }
 
   /* الحفاظ على اتجاه رأس الفاتورة (لوغو يسار، شارة يمين) */
