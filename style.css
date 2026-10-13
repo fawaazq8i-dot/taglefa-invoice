@@ -497,9 +497,16 @@ body {
     top: 0 !important;
     right: 0 !important;
     display: flex !important;
+    min-width: 110px !important;
+    overflow: visible !important;
   }
 
-  .red-badge-lbl { white-space: nowrap !important; }
+  .red-badge-lbl {
+    white-space: nowrap !important;
+    direction: rtl !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
 
   .items-tbl thead tr { background: var(--gold) !important; }
   .items-tbl th { color: var(--white) !important; }
