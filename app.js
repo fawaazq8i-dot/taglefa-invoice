@@ -461,7 +461,7 @@ async function printInvoice() {
 
   // إنشاء نسخة منفصلة للالتقاط
   const clone = inv.cloneNode(true);
-  clone.style.cssText = 'width:750px;max-width:750px;position:fixed;left:-9999px;top:0;overflow:visible;padding-bottom:30px;background:#fff;border:3.5px solid #E8189A;';
+  clone.style.cssText = 'width:750px;max-width:750px;position:absolute;left:-9999px;top:0;overflow:visible;padding-bottom:50px;background:#fff;border:3.5px solid #E8189A;height:auto;';
   document.body.appendChild(clone);
 
   // حذف عناصر no-print من النسخة
