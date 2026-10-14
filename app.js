@@ -511,7 +511,7 @@ async function printInvoice() {
       overlay.id = 'print-overlay';
       document.body.appendChild(overlay);
     }
-    overlay.innerHTML = `<img src="${img}" style="width:100%;height:auto;display:block">`;
+    overlay.innerHTML = `<img src="${img}" style="width:100%;height:auto;display:block"><div style="position:fixed;bottom:4px;left:4px;font-size:9px;color:#bbb;background:rgba(255,255,255,.8);padding:1px 4px;border-radius:3px">v39</div>`;
     overlay.style.display = 'block';
 
     window.print();
