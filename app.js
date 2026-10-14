@@ -42,7 +42,17 @@ async function init() {
   allCusts = await dbGetAll('customers');
   buildTable(ROWS);
   resetInvoice();
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.update();
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!sessionStorage.getItem('sw-reloaded')) {
+          sessionStorage.setItem('sw-reloaded', '1');
+          window.location.reload();
+        }
+      });
+    }).catch(()=>{});
+  }
 }
 
 /* ===== بناء جدول البضاعة ===== */
@@ -441,45 +451,60 @@ async function printInvoice() {
   } catch { toast('تعذّر تحميل المكتبة — تحقق من الاتصال', 'err'); return; }
 
   const inv = document.getElementById('invoice');
-  const noPrint = inv.querySelectorAll('.no-print');
-  noPrint.forEach(el => el.style.display = 'none');
   if (document.activeElement) document.activeElement.blur();
-
-  const prevWidth = inv.style.width, prevMax = inv.style.maxWidth;
-  inv.style.width = '750px'; inv.style.maxWidth = '750px';
-  const prevScroll = window.scrollY;
-  window.scrollTo(0, 0);
   await document.fonts.ready;
-  await new Promise(r => setTimeout(r, 300));
 
-  const captureH = inv.scrollHeight + 100;
+  // حفظ قيم الـ inputs في data attributes قبل النسخ
+  inv.querySelectorAll('input, textarea').forEach(inp => {
+    inp.setAttribute('data-pv', inp.value);
+  });
+
+  // إنشاء نسخة منفصلة للالتقاط
+  const clone = inv.cloneNode(true);
+  clone.style.cssText = 'width:750px;max-width:750px;position:fixed;left:-9999px;top:0;overflow:visible;padding-bottom:30px;background:#fff;border:3.5px solid #E8189A;';
+  document.body.appendChild(clone);
+
+  // حذف عناصر no-print من النسخة
+  clone.querySelectorAll('.no-print').forEach(el => el.remove());
+
+  // تحويل كل input إلى span مع قيمته الحقيقية
+  clone.querySelectorAll('input, textarea').forEach(inp => {
+    const val = inp.getAttribute('data-pv') || '';
+    const span = document.createElement('span');
+    span.textContent = val;
+    if (inp.classList.contains('red-badge-num')) {
+      span.style.cssText = 'font-family:Cairo,sans-serif;font-size:26px;font-weight:900;color:#fff;text-align:center;display:block;width:90px;line-height:1.1;';
+    } else {
+      const ta = inp.style.textAlign || (inp.style.direction === 'ltr' ? 'center' : 'right');
+      span.style.cssText = `font-family:Cairo,sans-serif;font-size:13px;color:#1a1a1a;background:transparent;display:inline-block;width:100%;text-align:${ta};padding:1px 0;border-bottom:1px solid #ddd;`;
+    }
+    inp.parentNode.replaceChild(span, inp);
+  });
+
+  // ضمان ظهور شريط التواصل والشارة الحمراء
+  const cb = clone.querySelector('.contact-bar');
+  if (cb) { cb.style.display = 'flex'; cb.style.visibility = 'visible'; cb.style.overflow = 'visible'; }
+  const badge = clone.querySelector('.red-badge');
+  if (badge) { badge.style.display = 'flex'; badge.style.overflow = 'visible'; badge.style.zIndex = '9999'; badge.style.minWidth = '110px'; }
+  clone.style.overflow = 'visible';
+
+  await new Promise(r => setTimeout(r, 250));
+
+  const captureH = clone.scrollHeight + 80;
 
   try {
-    const canvas = await html2canvas(inv, {
+    const canvas = await html2canvas(clone, {
       scale: 2, useCORS: true, allowTaint: true,
       backgroundColor: '#ffffff',
       width: 750, height: captureH,
       windowWidth: 750, windowHeight: captureH,
-      onclone: (_, clone) => {
-        clone.querySelectorAll('input,textarea').forEach(el => {
-          el.style.outline = 'none'; el.style.boxShadow = 'none'; el.style.background = 'transparent';
-        });
-        const b = clone.querySelector('.red-badge');
-        if (b) { b.style.display='flex'; b.style.zIndex='9999'; b.style.overflow='visible'; }
-        const cb = clone.querySelector('.contact-bar');
-        if (cb) { cb.style.display='flex'; cb.style.visibility='visible'; cb.style.opacity='1'; cb.style.overflow='visible'; }
-        clone.style.overflow = 'visible';
-        clone.style.paddingBottom = '24px';
-      }
     });
 
-    inv.style.width = prevWidth; inv.style.maxWidth = prevMax;
-    noPrint.forEach(el => el.style.display = '');
-    window.scrollTo(0, prevScroll);
+    document.body.removeChild(clone);
+    inv.querySelectorAll('input, textarea').forEach(inp => inp.removeAttribute('data-pv'));
 
     const img = canvas.toDataURL('image/jpeg', 0.95);
 
-    // طباعة من نفس الصفحة — بدون popup
     let overlay = document.getElementById('print-overlay');
     if (!overlay) {
       overlay = document.createElement('div');
@@ -493,9 +518,8 @@ async function printInvoice() {
 
     setTimeout(() => { overlay.style.display = 'none'; overlay.innerHTML = ''; }, 1500);
   } catch(e) {
-    inv.style.width = prevWidth; inv.style.maxWidth = prevMax;
-    noPrint.forEach(el => el.style.display = '');
-    window.scrollTo(0, prevScroll);
+    if (document.body.contains(clone)) document.body.removeChild(clone);
+    inv.querySelectorAll('input, textarea').forEach(inp => inp.removeAttribute('data-pv'));
     toast('حدث خطأ في الطباعة', 'err'); console.error(e);
   }
 }
