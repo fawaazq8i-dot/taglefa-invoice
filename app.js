@@ -481,9 +481,24 @@ async function printInvoice() {
     inp.parentNode.replaceChild(span, inp);
   });
 
-  // ضمان ظهور شريط التواصل والشارة الحمراء
+  // ضمان ظهور شريط التواصل (إزالة SVG لأنها تسبب مشكلة في html2canvas)
   const cb = clone.querySelector('.contact-bar');
-  if (cb) { cb.style.display = 'flex'; cb.style.visibility = 'visible'; cb.style.overflow = 'visible'; }
+  if (cb) {
+    cb.style.display = 'flex';
+    cb.style.visibility = 'visible';
+    cb.style.overflow = 'visible';
+    cb.style.paddingTop = '8px';
+    cb.style.borderTop = '1.5px solid #eee';
+    cb.style.marginTop = '4px';
+    cb.style.justifyContent = 'center';
+    cb.style.gap = '24px';
+    cb.style.flexWrap = 'wrap';
+    // إزالة SVG وإبقاء النص فقط
+    cb.querySelectorAll('svg').forEach(s => s.remove());
+    cb.querySelectorAll('.cb-item').forEach(item => {
+      item.style.cssText = 'display:flex;align-items:center;font-family:Cairo,sans-serif;font-size:13px;font-weight:600;color:#444;direction:ltr;gap:4px;';
+    });
+  }
   const badge = clone.querySelector('.red-badge');
   if (badge) { badge.style.display = 'flex'; badge.style.overflow = 'visible'; badge.style.zIndex = '9999'; badge.style.minWidth = '110px'; }
   clone.style.overflow = 'visible';
