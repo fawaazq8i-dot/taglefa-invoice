@@ -450,20 +450,26 @@ async function printInvoice() {
   const prevScroll = window.scrollY;
   window.scrollTo(0, 0);
   await document.fonts.ready;
-  await new Promise(r => setTimeout(r, 200));
+  await new Promise(r => setTimeout(r, 300));
+
+  const captureH = inv.scrollHeight + 100;
 
   try {
     const canvas = await html2canvas(inv, {
       scale: 2, useCORS: true, allowTaint: true,
       backgroundColor: '#ffffff',
-      width: 750, height: inv.scrollHeight,
-      windowWidth: 750, windowHeight: inv.scrollHeight,
+      width: 750, height: captureH,
+      windowWidth: 750, windowHeight: captureH,
       onclone: (_, clone) => {
         clone.querySelectorAll('input,textarea').forEach(el => {
           el.style.outline = 'none'; el.style.boxShadow = 'none'; el.style.background = 'transparent';
         });
         const b = clone.querySelector('.red-badge');
         if (b) { b.style.display='flex'; b.style.zIndex='9999'; b.style.overflow='visible'; }
+        const cb = clone.querySelector('.contact-bar');
+        if (cb) { cb.style.display='flex'; cb.style.visibility='visible'; cb.style.opacity='1'; cb.style.overflow='visible'; }
+        clone.style.overflow = 'visible';
+        clone.style.paddingBottom = '24px';
       }
     });
 
